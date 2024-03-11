@@ -5,7 +5,6 @@ import numpy as np
 import datetime
 import matplotlib.pyplot as plt
 
-# Configuration for Prometheus
 PROMETHEUS_URL = 'http://localhost:9090'
 PROMETHEUS_ACCESS_TOKEN = ''
 
@@ -15,14 +14,13 @@ prom = PrometheusConnect(url=PROMETHEUS_URL, disable_ssl=True, headers=headers)
 
 end_time = datetime.datetime.now()
 start_time = end_time - datetime.timedelta(days=7)
-step = '30000'  # 5 minutes in seconds, as a string
+step = '30000'
 
 query = 'rate(container_cpu_usage_seconds_total{pod=~"prometheus-monitor-kube-prometheus-st-prometheus-0"}[5m])'
 
 data = prom.custom_query_range(query=query, start_time=start_time, end_time=end_time, step=step)
 
 if data:
-    # Process the data
     timestamps = [datetime.datetime.fromtimestamp(float(item[0])) for item in data[0]['values']]
     cpu_usage = [float(item[1]) for item in data[0]['values']]
 
@@ -30,7 +28,6 @@ if data:
     df['timestamp'] = pd.to_datetime(df['timestamp'])
     df['time_delta'] = (df['timestamp'] - df['timestamp'].min()) / np.timedelta64(1, 'D')
 
-    # Split data into features and target
     X = df[['time_delta']]
     y = df['cpu_usage']
 

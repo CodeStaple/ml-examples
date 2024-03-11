@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.metrics import mean_squared_error, mean_absolute_error
+from sklearn.metrics import mean_squared_error
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense, Dropout
 from tensorflow.keras.optimizers import Adam
@@ -11,26 +11,19 @@ from prometheus_api_client import PrometheusConnect
 from math import sqrt
 import datetime
 
-# Configuration for Prometheus
 PROMETHEUS_URL = 'http://localhost:9090'
-PROMETHEUS_ACCESS_TOKEN = ''  # Your access token if needed
+PROMETHEUS_ACCESS_TOKEN = ''  
 
 # Initialize Prometheus connection
 prom = PrometheusConnect(url=PROMETHEUS_URL, disable_ssl=True)
 
-# Define the range query parameters for the last 7 days with 5-minute intervals
 end_time = datetime.datetime.now()
 start_time = end_time - datetime.timedelta(days=7)
 step = '3000'
 
-# Prometheus query to fetch CPU usage
 query = 'rate(container_cpu_usage_seconds_total{pod=~"opensearch-master-0"}[5m])'
-
-# Fetch the data over the last 7 days with 5-minute intervals
 data = prom.custom_query_range(query=query, start_time=start_time, end_time=end_time, step=step)
-
 if data:
-    # Process the data
     timestamps = [datetime.datetime.fromtimestamp(float(item[0])) for item in data[0]['values']]
     cpu_usage = [float(item[1]) for item in data[0]['values']]
 
